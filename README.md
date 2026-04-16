@@ -1,5 +1,7 @@
 # Hungry Spider - Complete Setup and Usage Guide
 
+This is a web crawler that can be connected to a local llm or AI
+
 ## Table of Contents
 1. System Requirements
 2. Installation
