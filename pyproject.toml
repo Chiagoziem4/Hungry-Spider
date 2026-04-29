@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=69.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hungry-spider"
+version = "1.0.0"
+description = "Modular, AI-augmented web crawling and intelligence gathering system"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Hungry Spider Contributors" }]
+dependencies = [
+    "scrapy>=2.11.0",
+    "playwright>=1.44.0",
+    "playwright-stealth>=1.0.6",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=5.2.0",
+    "sqlalchemy>=2.0.0",
+    "click>=8.1.0",
+    "pydantic>=2.7.0",
+    "httpx>=0.27.0",
+    "rich>=13.7.0",
+    "fake-useragent>=1.5.1",
+    "python-dotenv>=1.0.0",
+    "loguru>=0.7.2",
+    "tenacity>=8.3.0",
+    "openai>=1.30.0",
+    "anthropic>=0.28.0",
+    "scrapy-rotating-proxies>=0.6.2",
+    "PyYAML>=6.0.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0"]
+
+[project.scripts]
+spider = "spider.cli:cli"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["spider*"]

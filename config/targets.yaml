@@ -1,0 +1,21 @@
+targets:
+  - url: "https://news.ycombinator.com"
+    depth: 1
+    dynamic: false
+    job_name: "hacker_news_daily"
+    delay: 3.0
+    concurrency: 2
+
+  - url: "https://example-spa.com"
+    depth: 2
+    dynamic: true
+    job_name: "spa_site"
+    delay: 5.0
+    concurrency: 1
+
+  - url: "https://shop.example.com/products"
+    depth: 2
+    dynamic: false
+    schema: "ecommerce"
+    job_name: "product_scrape"
+    delay: 2.0

@@ -1,0 +1,14 @@
+name: ecommerce
+description: Product extraction schema for e-commerce pages.
+fields:
+  - source_url
+  - product_name
+  - price
+  - currency
+  - brand
+  - rating
+  - review_count
+  - availability
+  - description
+  - image_url
+  - sku

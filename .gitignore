@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+.env
+
+# Local runtime data
+config/proxies.txt
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+data/exports/*
+!data/exports/.gitkeep
+logs/*
+!logs/.gitkeep

@@ -1,0 +1,16 @@
+name: generic
+description: Default schema for articles, posts, and general web pages.
+fields:
+  - source_url
+  - title
+  - description
+  - author
+  - published_date
+  - category
+  - tags
+  - key_entities
+  - summary
+  - sentiment
+  - language
+  - contact_email
+  - phone_numbers

@@ -1,0 +1,7 @@
+targets:
+  - url: "https://example.com"
+    depth: 1
+    dynamic: false
+    job_name: "test_crawl_1"
+    delay: 0.5
+    concurrency: 1
