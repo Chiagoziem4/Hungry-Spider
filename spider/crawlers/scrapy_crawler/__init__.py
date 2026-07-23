@@ -1,5 +1,5 @@
 """Scrapy-oriented static crawler components."""
 
-from spider.crawlers.scrapy_crawler.runner import ScrapyCrawler
+from spider.crawlers.scrapy_crawler.runner import StaticCrawler
 
-__all__ = ["ScrapyCrawler"]
+__all__ = ["StaticCrawler"]

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from spider.ai.retrying import retry, stop_after_attempt, wait_exponential
+
 
 class AnthropicClient:
     """Async wrapper around the Anthropic messages API."""
@@ -12,6 +14,7 @@ class AnthropicClient:
         self.client = AsyncAnthropic(api_key=api_key)
         self.model = model
 
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=2, max=30))
     async def extract(self, prompt: str, max_tokens: int = 1024) -> str:
         response = await self.client.messages.create(
             model=self.model,

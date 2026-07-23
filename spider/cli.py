@@ -48,6 +48,43 @@ def db_stats():
     console.print(table)
 
 
+@db.command("jobs")
+@click.option("--limit", default=20, show_default=True, help="Number of recent jobs to show")
+def db_jobs(limit):
+    """List recent crawl jobs."""
+    from spider.storage.db import session_scope
+    from spider.storage.models import CrawlJob
+    from sqlalchemy import select
+
+    with session_scope() as session:
+        rows = list(
+            session.scalars(
+                select(CrawlJob).order_by(CrawlJob.started_at.desc()).limit(limit)
+            )
+        )
+
+    table = Table(title="Recent Crawl Jobs")
+    table.add_column("ID", style="cyan")
+    table.add_column("Name", style="white")
+    table.add_column("URL", style="blue")
+    table.add_column("Status", style="green")
+    table.add_column("Crawled", justify="right")
+    table.add_column("Extracted", justify="right")
+    table.add_column("Started", style="dim")
+
+    for job in rows:
+        table.add_row(
+            str(job.id),
+            job.job_name or "-",
+            (job.target_url or "")[:50],
+            job.status,
+            str(job.pages_crawled),
+            str(job.pages_extracted),
+            job.started_at.strftime("%Y-%m-%d %H:%M") if job.started_at else "-",
+        )
+    console.print(table)
+
+
 @cli.command("crawl")
 @click.argument("url")
 @click.option("--depth", "depth", default=2, show_default=True, help="Max crawl depth")
@@ -58,7 +95,8 @@ def db_stats():
 @click.option("--delay", default=2.0, show_default=True, help="Base delay between requests")
 @click.option("--output", type=click.Choice(["db", "json", "csv", "jsonl"]), default="db")
 @click.option("--job-name", default=None, help="Optional name for the crawl job")
-def crawl(url, depth, dynamic, ai, proxies, concurrency, delay, output, job_name):
+@click.option("--schema", default="generic", show_default=True, help="Extraction schema: generic, ecommerce, news, job, social")
+def crawl(url, depth, dynamic, ai, proxies, concurrency, delay, output, job_name, schema):
     """Crawl a target URL and extract data."""
     from spider.core.engine import CrawlEngine
 
@@ -72,6 +110,7 @@ def crawl(url, depth, dynamic, ai, proxies, concurrency, delay, output, job_name
         "delay": delay,
         "output": output,
         "job_name": job_name or f"crawl_{Path(url).name or 'target'}",
+        "schema": schema,
     }
     result = asyncio.run(CrawlEngine(config).run())
     console.print(f"[green]Crawl complete[/green] job_id={result['job_id']}")
@@ -111,14 +150,16 @@ def crawl_file(targets_file, ai):
 
 
 @cli.command("export")
-@click.option("--format", "format_", type=click.Choice(["json", "csv", "jsonl"]), default="json")
+@click.option("--format", "format_", type=click.Choice(["json", "csv", "jsonl"]), default="json", show_default=True)
 @click.option("--output", default="data/exports/output", help="Output file path without extension")
 @click.option("--limit", default=None, type=int, help="Maximum records to export")
-def export_cmd(format_, output, limit):
+@click.option("--job-id", default=None, type=int, help="Export only records from this job ID")
+@click.option("--schema", default="generic", show_default=True, help="Schema used: generic, ecommerce, news, job, social")
+def export_cmd(format_, output, limit, job_id, schema):
     """Export extracted data to JSON, CSV, or JSONL."""
     from spider.storage.exporter import export_data
 
-    path = export_data(format=format_, output_path=output, limit=limit)
+    path = export_data(format=format_, output_path=output, limit=limit, job_id=job_id)
     console.print(f"[green]Exported to {path}[/green]")
 
 

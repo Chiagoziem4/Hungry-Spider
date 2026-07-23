@@ -17,3 +17,4 @@ anthropic>=0.28.0
 scrapy-rotating-proxies>=0.6.2
 PyYAML>=6.0.1
 pytest>=8.0.0
+pydantic-settings>=2.3.0

@@ -14,7 +14,7 @@ from spider.antidetect.proxy_manager import ProxyManager
 from spider.utils.validators import normalise_url, same_domain
 
 
-class ScrapyCrawler:
+class StaticCrawler:
     """Static crawler adapter with a lightweight async fallback path."""
 
     def __init__(
@@ -25,12 +25,14 @@ class ScrapyCrawler:
         randomise_delay: bool = True,
         max_pages: int = 50,
         timeout: float = 30.0,
+        verify_ssl: bool = True,
     ):
         self.proxy_manager = proxy_manager
         self.delay = delay
         self.randomise_delay = randomise_delay
         self.max_pages = max_pages
         self.timeout = timeout
+        self.verify_ssl = verify_ssl
 
     async def crawl(self, start_url: str, depth: int = 2) -> list[dict]:
         logger.info("Starting static crawl")
@@ -41,7 +43,7 @@ class ScrapyCrawler:
         queue = deque([(start_url, 0)])
         pages: list[dict] = []
 
-        async with httpx.AsyncClient(follow_redirects=True, timeout=self.timeout, verify=False) as client:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=self.timeout, verify=self.verify_ssl) as client:
             while queue and len(pages) < self.max_pages:
                 url, current_depth = queue.popleft()
                 url = urldefrag(url).url

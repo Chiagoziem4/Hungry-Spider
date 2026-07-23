@@ -39,10 +39,65 @@ class EcommerceItem(BaseModel):
     sku: Optional[str] = None
 
 
+class JobPostingItem(BaseModel):
+    """Schema for job posting pages."""
+
+    source_url: str
+    job_title: Optional[str] = None
+    company: Optional[str] = None
+    location: Optional[str] = None
+    remote: Optional[bool] = None
+    salary_range: Optional[str] = None
+    employment_type: Optional[str] = None
+    experience_required: Optional[str] = None
+    skills_required: list[str] = Field(default_factory=list)
+    posted_date: Optional[str] = None
+    description: Optional[str] = None
+    apply_url: Optional[str] = None
+
+
+class NewsArticleItem(BaseModel):
+    """Schema optimised for news and blog articles."""
+
+    source_url: str
+    headline: Optional[str] = None
+    subheadline: Optional[str] = None
+    author: Optional[str] = None
+    published_date: Optional[str] = None
+    updated_date: Optional[str] = None
+    outlet: Optional[str] = None
+    topics: list[str] = Field(default_factory=list)
+    summary: Optional[str] = None
+    word_count: Optional[int] = None
+    language: Optional[str] = None
+
+
+class SocialProfileItem(BaseModel):
+    """Schema for social and professional profile pages."""
+
+    source_url: str
+    full_name: Optional[str] = None
+    username: Optional[str] = None
+    bio: Optional[str] = None
+    location: Optional[str] = None
+    website: Optional[str] = None
+    email: Optional[str] = None
+    followers: Optional[int] = None
+    following: Optional[int] = None
+    company: Optional[str] = None
+    job_title: Optional[str] = None
+
+
 SCHEMA_REGISTRY = {
     "generic": ExtractedItem,
     "default": ExtractedItem,
     "ecommerce": EcommerceItem,
+    "job": JobPostingItem,
+    "job_posting": JobPostingItem,
+    "news": NewsArticleItem,
+    "article": NewsArticleItem,
+    "social": SocialProfileItem,
+    "profile": SocialProfileItem,
 }
 
 

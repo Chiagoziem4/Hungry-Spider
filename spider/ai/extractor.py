@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from typing import Any
 
@@ -10,19 +11,25 @@ from spider.ai.schemas import ExtractedItem
 from spider.parsers.html_cleaner import clean_html
 from spider.parsers.text_extractor import extract_text
 
+MAX_CONTENT_CHARS = int(os.getenv("MAX_CONTENT_CHARS", "12000"))
 
 EXTRACTION_PROMPT_TEMPLATE = """You are a precise data extraction engine.
 Analyse the following web page content and extract structured data.
 
-Return ONLY a valid JSON object matching this schema - no explanation, no markdown:
+Rules:
+- Return ONLY a valid JSON object, no markdown fences, no explanation.
+- Use null for any field you cannot determine from the content.
+- Do NOT invent or hallucinate data; only extract what is clearly present.
+- Schema to follow:
 {schema}
 
-Web page content:
+Page URL: {url}
+Page content:
 ---
 {content}
 ---
 
-JSON output:"""
+JSON:"""
 
 
 class DataExtractor:
@@ -39,13 +46,14 @@ class DataExtractor:
             return None
 
         clean = clean_html(html)
-        text = extract_text(clean)[:3000]
+        text = extract_text(clean)[:MAX_CONTENT_CHARS]
         if len(text.strip()) < 50:
             logger.warning(f"Insufficient text content for {url}")
             return None
 
         prompt = EXTRACTION_PROMPT_TEMPLATE.format(
             schema=json.dumps(self.schema, indent=2),
+            url=url,
             content=text,
         )
         logger.info(f"[AI] Extracting structured data from {url}")

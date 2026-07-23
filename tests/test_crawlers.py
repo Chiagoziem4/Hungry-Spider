@@ -1,5 +1,5 @@
 from spider.core.queue_manager import QueueManager
-from spider.crawlers.scrapy_crawler.runner import ScrapyCrawler
+from spider.crawlers.scrapy_crawler.runner import StaticCrawler
 
 
 
@@ -23,7 +23,7 @@ def test_static_crawler_extracts_same_domain_links():
     </html>
     """
 
-    links = ScrapyCrawler.extract_links(html, "https://example.com")
+    links = StaticCrawler.extract_links(html, "https://example.com")
 
     assert "https://example.com/about" in links
     assert "https://example.com/contact" in links

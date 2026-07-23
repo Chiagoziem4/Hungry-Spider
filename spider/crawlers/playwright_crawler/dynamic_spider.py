@@ -42,7 +42,10 @@ class DynamicSpider:
             return {"url": url, "html": "", "status": 0, "headers": {}, "error": str(exc)}
         finally:
             await context.close()
-            await self.browser_manager.close()
+
+    async def close(self) -> None:
+        """Shut down the browser. Call once after all pages are scraped."""
+        await self.browser_manager.close()
 
     async def scrape_many(self, urls: list[str], concurrency: int = 2) -> list[dict]:
         semaphore = asyncio.Semaphore(concurrency)

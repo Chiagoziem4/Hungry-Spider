@@ -12,7 +12,7 @@ from spider.antidetect.proxy_manager import ProxyManager
 from spider.core.queue_manager import QueueManager
 from spider.core.session import CrawlSession
 from spider.crawlers.playwright_crawler import DynamicSpider
-from spider.crawlers.scrapy_crawler import ScrapyCrawler
+from spider.crawlers.scrapy_crawler import StaticCrawler
 from spider.storage.db import init_db
 from spider.storage.exporter import export_data
 from spider.storage.repository import CrawlJobRepository, ExtractedDataRepository, RawPageRepository
@@ -59,13 +59,17 @@ class CrawlEngine:
         self.schema_model = get_schema_model(self.config.schema)
         self.ai_client = get_ai_client() if self.config.enable_ai else None
         self.extractor = DataExtractor(self.ai_client, self.schema_model) if self.ai_client else None
-        self.static_crawler = ScrapyCrawler(
-            proxy_manager=self.proxy_manager,
-            delay=self.config.delay,
-            randomise_delay=settings.RANDOMISE_DELAY,
-            max_pages=self.config.max_pages,
-        )
-        self.dynamic_crawler = DynamicSpider(proxy_manager=self.proxy_manager)
+        if self.config.use_playwright:
+            self.dynamic_crawler = DynamicSpider(proxy_manager=self.proxy_manager)
+            self.static_crawler = None
+        else:
+            self.static_crawler = StaticCrawler(
+                proxy_manager=self.proxy_manager,
+                delay=self.config.delay,
+                randomise_delay=settings.RANDOMISE_DELAY,
+                max_pages=self.config.max_pages,
+            )
+            self.dynamic_crawler = None
 
     async def run(self) -> dict:
         init_db()
@@ -148,16 +152,19 @@ class CrawlEngine:
             queue = QueueManager()
             pages: list[dict] = []
             queue.add(self.config.url, depth=0)
-            while queue and len(pages) < self.config.max_pages:
-                url, depth = queue.pop()
-                result = await self.dynamic_crawler.scrape(url)
-                if not result.get("html"):
-                    continue
-                pages.append(result)
-                if depth >= self.config.depth:
-                    continue
-                for link in self.dynamic_crawler.extract_links(result["html"], result["url"]):
-                    queue.add(link, depth=depth + 1)
+            try:
+                while queue and len(pages) < self.config.max_pages:
+                    url, depth = queue.pop()
+                    result = await self.dynamic_crawler.scrape(url)
+                    if not result.get("html"):
+                        continue
+                    pages.append(result)
+                    if depth >= self.config.depth:
+                        continue
+                    for link in self.dynamic_crawler.extract_links(result["html"], result["url"]):
+                        queue.add(link, depth=depth + 1)
+            finally:
+                await self.dynamic_crawler.close()
             return pages
         return await self.static_crawler.crawl(self.config.url, self.config.depth)
 
