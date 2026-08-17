@@ -47,6 +47,18 @@ try:
 
     settings = Settings()
 
+    def reload_settings() -> Settings:
+        global settings
+        settings = Settings()
+        # Avoid a circular import at module load time; the storage layer will
+        # rebuild its engine against the new settings on the next access.
+        try:
+            from spider.storage.db import reset_engine
+            reset_engine()
+        except ImportError:
+            pass
+        return settings
+
 except ImportError:
     # Fallback to legacy dataclass approach if pydantic-settings is not installed
     from dataclasses import dataclass
